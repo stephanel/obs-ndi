@@ -559,7 +559,7 @@ void ndi_source_mouse_click(void *data, const struct obs_mouse_event *event, int
 
 void ndi_source_mouse_move(void *data, const struct obs_mouse_event *event, bool mouse_leave)
 {
-	float step = 0.1f;
+	float step = 0.01f;
 
 	auto s = (struct ndi_source*)data;
 	
@@ -570,18 +570,29 @@ void ndi_source_mouse_move(void *data, const struct obs_mouse_event *event, bool
 		uint32_t height = obs_source_get_height(s->source);
 
 		int32_t horizontal_middle = (width / 2);
+		float pan = s->ptz_pan;
 		if (event->x > horizontal_middle) {
-			s->ptz_pan = float_min(1.0, s->ptz_pan + step);
+			pan += step;
 		} else if (event->x < horizontal_middle) {
-			s->ptz_pan = float_max(0.0, s->ptz_pan - step);
+			pan -= step;
 		}
 
 		int32_t vertical_middle = (height / 2);
+		float tilt = s->ptz_tilt;
 		if (event->y > vertical_middle) {
-			s->ptz_tilt = float_min(1.0, s->ptz_tilt + step);
+			tilt += step;
 		} else if (event->y < vertical_middle) {
-			s->ptz_tilt = float_max(0.0, s->ptz_tilt - step);
+			tilt -= step;
 		}
+		
+		s->ptz_pan = float_max(
+			-1.0f,
+			float_min(1.0f, pan)
+		);
+		s->ptz_tilt = float_max(
+			-1.0f,
+			float_min(1.0f, tilt)
+		);
 
 		ndiLib->NDIlib_recv_ptz_pan_tilt(s->ndi_receiver, s->ptz_pan, s->ptz_tilt);
 	}
@@ -595,7 +606,15 @@ void ndi_source_mouse_wheel(void *data, const struct obs_mouse_event *event, int
 
 	if (!ndiLib->NDIlib_recv_ptz_is_supported(s->ndi_receiver)) return;
 
-	s->ptz_zoom += ((float)(x_delta) / 100.0f);
+	s->ptz_zoom = float_max(
+		0.0f,
+		float_min(
+			1.0f,
+			s->ptz_zoom + ((float)(y_delta) / 1000.0f)
+		)
+	);
+
+	ndiLib->NDIlib_recv_ptz_zoom_speed(s->ndi_receiver, 1.0);
 	ndiLib->NDIlib_recv_ptz_zoom(s->ndi_receiver, s->ptz_zoom);
 
 	UNUSED_PARAMETER(event);
