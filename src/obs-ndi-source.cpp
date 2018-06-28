@@ -64,7 +64,22 @@ struct ndi_source
 	bool running;
 	NDIlib_tally_t tally;
 	bool alpha_filter_enabled;
+
+	bool mouse_button_down;
+	float ptz_zoom;
+	float ptz_pan;
+	float ptz_tilt;
 };
+
+static float float_min(float a, float b)
+{
+	return (a < b ? a : b);
+}
+
+static float float_max(float a, float b)
+{
+	return (a > b ? a : b);
+}
 
 static obs_source_t* find_filter_by_id(obs_source_t* context, const char* id)
 {
@@ -532,6 +547,60 @@ void ndi_source_deactivated(void* data)
 	}
 }
 
+void ndi_source_mouse_click(void *data, const struct obs_mouse_event *event, int32_t type, bool mouse_up, uint32_t click_count)
+{
+	auto s = (struct ndi_source*)data;
+	s->mouse_button_down = !mouse_up;
+
+	UNUSED_PARAMETER(event);
+	UNUSED_PARAMETER(type);
+	UNUSED_PARAMETER(click_count);
+}
+
+void ndi_source_mouse_move(void *data, const struct obs_mouse_event *event, bool mouse_leave)
+{
+	float step = 0.1f;
+
+	auto s = (struct ndi_source*)data;
+	
+	if (!ndiLib->NDIlib_recv_ptz_is_supported(s->ndi_receiver)) return;
+
+	if (s->mouse_button_down) {
+		uint32_t width = obs_source_get_width(s->source);
+		uint32_t height = obs_source_get_height(s->source);
+
+		int32_t horizontal_middle = (width / 2);
+		if (event->x > horizontal_middle) {
+			s->ptz_pan = float_min(1.0, s->ptz_pan + step);
+		} else if (event->x < horizontal_middle) {
+			s->ptz_pan = float_max(0.0, s->ptz_pan - step);
+		}
+
+		int32_t vertical_middle = (height / 2);
+		if (event->y > vertical_middle) {
+			s->ptz_tilt = float_min(1.0, s->ptz_tilt + step);
+		} else if (event->y < vertical_middle) {
+			s->ptz_tilt = float_max(0.0, s->ptz_tilt - step);
+		}
+
+		ndiLib->NDIlib_recv_ptz_pan_tilt(s->ndi_receiver, s->ptz_pan, s->ptz_tilt);
+	}
+
+	UNUSED_PARAMETER(mouse_leave);
+}
+
+void ndi_source_mouse_wheel(void *data, const struct obs_mouse_event *event, int x_delta, int y_delta)
+{
+	auto s = (struct ndi_source*)data;
+
+	if (!ndiLib->NDIlib_recv_ptz_is_supported(s->ndi_receiver)) return;
+
+	s->ptz_zoom += ((float)(x_delta) / 100.0f);
+	ndiLib->NDIlib_recv_ptz_zoom(s->ndi_receiver, s->ptz_zoom);
+
+	UNUSED_PARAMETER(event);
+}
+
 void* ndi_source_create(obs_data_t* settings, obs_source_t* source)
 {
 	auto s = (struct ndi_source*)bzalloc(sizeof(struct ndi_source));
@@ -557,7 +626,7 @@ struct obs_source_info create_ndi_source_info()
 	ndi_source_info.id				= "ndi_source";
 	ndi_source_info.type			= OBS_SOURCE_TYPE_INPUT;
 	ndi_source_info.output_flags	= OBS_SOURCE_ASYNC_VIDEO | OBS_SOURCE_AUDIO |
-									  OBS_SOURCE_DO_NOT_DUPLICATE;
+									  OBS_SOURCE_DO_NOT_DUPLICATE | OBS_SOURCE_INTERACTION;
 	ndi_source_info.get_name		= ndi_source_getname;
 	ndi_source_info.get_properties	= ndi_source_getproperties;
 	ndi_source_info.update			= ndi_source_update;
@@ -565,6 +634,9 @@ struct obs_source_info create_ndi_source_info()
 	ndi_source_info.hide			= ndi_source_hidden;
 	ndi_source_info.activate		= ndi_source_activated;
 	ndi_source_info.deactivate		= ndi_source_deactivated;
+	ndi_source_info.mouse_click		= ndi_source_mouse_click;
+	ndi_source_info.mouse_move		= ndi_source_mouse_move;
+	ndi_source_info.mouse_wheel		= ndi_source_mouse_wheel;
 	ndi_source_info.create			= ndi_source_create;
 	ndi_source_info.destroy			= ndi_source_destroy;
 
