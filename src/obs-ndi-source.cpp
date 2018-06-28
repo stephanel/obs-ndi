@@ -594,6 +594,8 @@ void ndi_source_mouse_move(void *data, const struct obs_mouse_event *event, bool
 			float_min(1.0f, tilt)
 		);
 
+		float zoom_speed = (1.0f - s->ptz_zoom);
+		ndiLib->NDIlib_recv_ptz_pan_tilt_speed(s->ndi_receiver, zoom_speed, zoom_speed);
 		ndiLib->NDIlib_recv_ptz_pan_tilt(s->ndi_receiver, s->ptz_pan, s->ptz_tilt);
 	}
 
@@ -614,7 +616,7 @@ void ndi_source_mouse_wheel(void *data, const struct obs_mouse_event *event, int
 		)
 	);
 
-	ndiLib->NDIlib_recv_ptz_zoom_speed(s->ndi_receiver, 1.0);
+	ndiLib->NDIlib_recv_ptz_zoom_speed(s->ndi_receiver, 1.0f);
 	ndiLib->NDIlib_recv_ptz_zoom(s->ndi_receiver, s->ptz_zoom);
 
 	UNUSED_PARAMETER(event);
