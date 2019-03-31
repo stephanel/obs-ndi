@@ -133,7 +133,7 @@ if(UNIX AND NOT APPLE)
 		obs-frontend-api)
 
 	install(TARGETS obs-ndi
-		LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/obs-plugins)
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/obs-plugins)
 	install(FILES data/locale/en-US.ini data/locale/fr-FR.ini
 		DESTINATION "${CMAKE_INSTALL_PREFIX}/share/obs/obs-plugins/obs-ndi/locale")
 endif()
