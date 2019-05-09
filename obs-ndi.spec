@@ -1,11 +1,4 @@
-#*********************************************************************************************************
-#*   __     __               __     ______                __   __                      _______ _______   *
-#*  |  |--.|  |.---.-..----.|  |--.|   __ \.---.-..-----.|  |_|  |--..-----..----.    |       |     __|  *
-#*  |  _  ||  ||  _  ||  __||    < |    __/|  _  ||     ||   _|     ||  -__||   _|    |   -   |__     |  *
-#*  |_____||__||___._||____||__|__||___|   |___._||__|__||____|__|__||_____||__|      |_______|_______|  *
-#* http://www.blackpantheros.eu | http://www.blackpanther.hu - kbarcza[]blackpanther.hu * Charles Barcza *
-#*************************************************************************************(c)2002-2019********
-# 	Soec written by Charles K Barcza for blackPanther OS - www.blackpanther.hu
+# 	Spec example written by Charles K Barcza for blackPanther OS - www.blackpanther.hu
 
 %define genlibndi 1
 
