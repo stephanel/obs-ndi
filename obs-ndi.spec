@@ -16,7 +16,7 @@ Source0: %name-%version.tar.gz
 Source1: obs-studio-23.1.0-rc1.tar.gz
 Patch0:	 %name-libdir.patch
 Summary: OBS broadcast to OBS
-License: GPL
+License: GPLv2
 Group:   Multimedia/Video
 Recommends: %{_lib}ndi3 >= 3.8.0
 
@@ -47,8 +47,10 @@ Features:
 Version: 3.8.0
 Release: %mkrel 1
 Summary: NDI runtime for %name
-License: see /usr/share/doc/libndi3/copyright
+License: Non-Free see: /usr/share/doc/libndi3/copyright or Url
+Url:	http://obsproject.com
 Group: Multimedia/Video
+Requires: obs-studio >= 23.1.0
 
 %description -n %{_lib}ndi3
 NDI runtime library for %name
