@@ -18,7 +18,7 @@ Patch0:	 %name-libdir.patch
 Summary: OBS broadcast to OBS
 License: GPL
 Group:   Multimedia/Video
-Requires: %{_lib}ndi3 >= 3.8.0
+Recommends: %{_lib}ndi3 >= 3.8.0
 
 %description
 Network A/V in OBS Studio with NewTek's NDI technology.
@@ -95,6 +95,9 @@ ln -sf libndi.so.3 %buildroot/usr/lib/
 
 
 %changelog
+* Thu May 09 2019 Charles K. Barcza <info@blackpanther.hu> 4.6.0-3bP
+- fix : requires to recommends
+------------------------------------------------------------------------
 * Sun Mar 31 2019 Charles K. Barcza <info@blackpanther.hu> 4.6.0-2bP
 - add gen multiple package with runtime depency 
 - add patch for lib install pathfix
