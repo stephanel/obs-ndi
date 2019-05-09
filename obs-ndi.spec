@@ -1,17 +1,46 @@
 # 	Spec example written by Charles K Barcza for blackPanther OS - www.blackpanther.hu
 
 %define genlibndi 1
+%define rel 3
 
 Name: 	 obs-ndi
 Version: 4.6.0
-Release: %mkrel 2
+%if 0%{?fedora} || 0%{?rhel}
+Release: %{rel}
+%else
+Release: %mkrel %{rel}
+%endif
 Source0: %name-%version.tar.gz
 Source1: obs-studio-23.1.0-rc1.tar.gz
 Patch0:	 %name-libdir.patch
 Summary: OBS broadcast to OBS
-License: GPLv2
+License: GPLv2+
 Group:   Multimedia/Video
 Recommends: %{_lib}ndi3 >= 3.8.0
+
+# Requires for OBS build
+BuildRequires:  cmake
+BuildRequires:  ffmpeg-devel
+BuildRequires:  pkgconfig(alsa)
+BuildRequires:  pkgconfig(fontconfig)
+BuildRequires:  pkgconfig(freetype2)
+BuildRequires:  pkgconfig(gl)
+BuildRequires:  pkgconfig(jack)
+BuildRequires:  pkgconfig(jansson)
+BuildRequires:  pkgconfig(libcurl)
+BuildRequires:  pkgconfig(libpulse)
+BuildRequires:  pkgconfig(libv4l2)
+BuildRequires:  pkgconfig(libvlc)
+BuildRequires:  pkgconfig(Qt5Core)
+BuildRequires:  pkgconfig(Qt5Gui)
+BuildRequires:  pkgconfig(Qt5Widgets)
+BuildRequires:  pkgconfig(Qt5X11Extras)
+BuildRequires:  pkgconfig(udev)
+BuildRequires:  pkgconfig(x11-xcb)
+BuildRequires:  pkgconfig(xcomposite)
+BuildRequires:  pkgconfig(xinerama)
+BuildRequires:  pkgconfig(xrandr)
+BuildRequires:  pkgconfig(zlib)
 
 %description
 Network A/V in OBS Studio with NewTek's NDI technology.
@@ -93,6 +122,7 @@ ln -sf libndi.so.3 %buildroot/usr/lib/
 * Thu May 09 2019 Charles K. Barcza <info@blackpanther.hu> 4.6.0-3bP
 - fix : requires to recommends
 ------------------------------------------------------------------------
+
 * Sun Mar 31 2019 Charles K. Barcza <info@blackpanther.hu> 4.6.0-2bP
 - add gen multiple package with runtime depency 
 - add patch for lib install pathfix
