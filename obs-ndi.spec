@@ -73,6 +73,7 @@ License: Non-Free see: /usr/share/doc/libndi3/copyright or Url
 Url:	http://obsproject.com
 Group: Multimedia/Video
 Requires: obs-studio >= 23.1.0
+Requires: avahi
 
 %description -n %{_lib}ndi3
 NDI runtime library for %name
@@ -102,7 +103,11 @@ wget -c "https://github.com/Palakis/obs-ndi/releases/download/4.6.0/%{deb_packag
 %endif
 
 %build
+%if 0%{?fedora} || 0%{?rhel}
+%cmake .. -DLIBOBS_INCLUDE_DIR=../obs-studio-23.1.0-rc1/libobs
+%else
 %cmake -DLIBOBS_INCLUDE_DIR=../obs-studio-23.1.0-rc1/libobs
+%endif
 
 %make_build
 
