@@ -16,29 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program; If not, see <https://www.gnu.org/licenses/>
 */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+//
+// Created by Bastien Aracil on 13/05/2019.
+//
 
-#include <QString>
-#include <obs-module.h>
+#ifndef OBS_NDI_NDI_UTILS_H
+#define OBS_NDI_NDI_UTILS_H
 
-class Config {
-  public:
-	Config();
-	static void OBSSaveCallback(obs_data_t* save_data,
-		bool saving, void* private_data);
-	static Config* Current();
-	void Load();
-	void Save();
+bool is_extra_ips_valid(const char *extra_ips);
 
-	bool OutputEnabled;
-	QString FinderExtraIps;
-	QString OutputName;
-	QString PreviewOutputName;
-	bool PreviewOutputEnabled;
-
-  private:
-	static Config* _instance;
-};
-
-#endif // CONFIG_H
+#endif //OBS_NDI_NDI_UTILS_H

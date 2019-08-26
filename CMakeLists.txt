@@ -19,6 +19,7 @@ endif()
 
 set(obs-ndi_SOURCES
 	src/obs-ndi.cpp
+	src/obs-ndi-source-helpers.cpp
 	src/obs-ndi-source.cpp
 	src/obs-ndi-output.cpp
 	src/obs-ndi-filter.cpp
@@ -26,14 +27,19 @@ set(obs-ndi_SOURCES
 	src/main-output.cpp
 	src/preview-output.cpp
 	src/Config.cpp
-	src/forms/output-settings.cpp)
+	src/forms/ndi-settings.cpp)
 
 set(obs-ndi_HEADERS
 	src/obs-ndi.h
+	src/obs-ndi-source-helpers.h
 	src/main-output.h
 	src/preview-output.h
 	src/Config.h
-	src/forms/output-settings.h)
+	src/forms/ndi-settings.h
+	src/ndi-source-finder.h
+	src/ndi-source-finder.cpp
+	src/ndi-utils.cpp
+	src/ndi-utils.h)
 
 add_library(obs-ndi MODULE
 	${obs-ndi_SOURCES}
@@ -41,12 +47,12 @@ add_library(obs-ndi MODULE
 
 include_directories(
 	"lib/ndi/Include"
+	"${LIBOBS_INCLUDE_DIR}"
 	"${LIBOBS_INCLUDE_DIR}/../UI/obs-frontend-api"
 	${Qt5Core_INCLUDES}
 	${Qt5Widgets_INCLUDES})
 
 target_link_libraries(obs-ndi
-	libobs
 	Qt5::Core
 	Qt5::Widgets)
 
@@ -73,6 +79,7 @@ if(WIN32)
 	find_package(w32-pthreads REQUIRED)
 
 	target_link_libraries(obs-ndi
+		"${LIBOBS_LIB}"
 		"${OBS_FRONTEND_LIB}"
 		w32-pthreads)
 

@@ -1,6 +1,6 @@
 /*
 obs-ndi
-Copyright (C) 2016-2018 St�phane Lepin <steph  name of author
+Copyright (C) 2016-2018 Stéphane Lepin <steph  name of author
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -60,7 +60,7 @@ void preview_output_start(const char* output_name)
 {
 	if (context.enabled || !context.output) return;
 
-	blog(LOG_INFO, "starting NDI preview output with name '%s'", output_name);
+	ndiblog(LOG_INFO, "starting NDI preview output with name '%s'", output_name);
 
 	obs_get_video_info(&context.ovi);
 
@@ -122,7 +122,7 @@ void preview_output_stop()
 {	
 	if (!context.enabled) return;
 
-	blog(LOG_INFO, "stopping NDI preview output");
+	ndiblog(LOG_INFO, "stopping NDI preview output");
 
 	obs_output_stop(context.output);
 	video_output_stop(context.video_queue);

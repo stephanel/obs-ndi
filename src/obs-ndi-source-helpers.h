@@ -16,29 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program; If not, see <https://www.gnu.org/licenses/>
 */
 
-#ifndef CONFIG_H
-#define CONFIG_H
 
-#include <QString>
-#include <obs-module.h>
+//
+// Created by Bastien Aracil on 13/05/2019.
+//
+#pragma once
+#include <obs-properties.h>
+#include <Processing.NDI.Lib.h>
+#include <util/dstr.h>
 
-class Config {
-  public:
-	Config();
-	static void OBSSaveCallback(obs_data_t* save_data,
-		bool saving, void* private_data);
-	static Config* Current();
-	void Load();
-	void Save();
 
-	bool OutputEnabled;
-	QString FinderExtraIps;
-	QString OutputName;
-	QString PreviewOutputName;
-	bool PreviewOutputEnabled;
+void serialize_ndi_source(const NDIlib_source_t *ndi_source, dstr *dest_serialized);
 
-  private:
-	static Config* _instance;
-};
-
-#endif // CONFIG_H
+void deserialize_ndi_source(const char *serialized_ndi_source, char **dni_name, char **url);

@@ -1,6 +1,6 @@
 /*
 obs-ndi
-Copyright (C) 2016-2018 Stéphane Lepin <steph  name of author
+Copyright (C) 2016-2018 StÃ©phane Lepin <steph  name of author
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -16,26 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program; If not, see <https://www.gnu.org/licenses/>
 */
 
-#ifndef OUTPUTSETTINGS_H
-#define OUTPUTSETTINGS_H
+//
+// Created by Bastien Aracil on 13/05/2019.
+//
 
-#include <QDialog>
+#pragma once
+#include <Processing.NDI.Lib.h>
 
-#include "ui_output-settings.h"
+typedef void (*ndi_source_consumer_t)(const NDIlib_source_t* ndi_source, void* private_data);
 
-class OutputSettings : public QDialog {
-  Q_OBJECT
-  public:
-	explicit OutputSettings(QWidget* parent = 0);
-	~OutputSettings();
-	void showEvent(QShowEvent* event);
-	void ToggleShowHide();
+void destroy_ndi_finder();
 
-  private slots:
-	void onFormAccepted();
+void update_ndi_finder(const char *extraIps);
 
-  private:
-	Ui::OutputSettings* ui;
-};
-
-#endif // OUTPUTSETTINGS_H
+void foreach_current_ndi_source(ndi_source_consumer_t consumer, void* private_data);

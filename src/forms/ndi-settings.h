@@ -1,6 +1,6 @@
 /*
 obs-ndi
-Copyright (C) 2016-2018 St√©phane Lepin <steph  name of author
+Copyright (C) 2016-2018 StÈphane Lepin <steph  name of author
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -16,29 +16,26 @@ You should have received a copy of the GNU General Public License
 along with this program; If not, see <https://www.gnu.org/licenses/>
 */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef NDISETTINGS_H
+#define NDISETTINGS_H
 
-#include <QString>
-#include <obs-module.h>
+#include <QDialog>
 
-class Config {
+#include "ui_ndi-settings.h"
+
+class NDISettings : public QDialog {
+  Q_OBJECT
   public:
-	Config();
-	static void OBSSaveCallback(obs_data_t* save_data,
-		bool saving, void* private_data);
-	static Config* Current();
-	void Load();
-	void Save();
+	explicit NDISettings(QWidget* parent = 0);
+	~NDISettings();
+	void showEvent(QShowEvent* event);
+	void ToggleShowHide();
 
-	bool OutputEnabled;
-	QString FinderExtraIps;
-	QString OutputName;
-	QString PreviewOutputName;
-	bool PreviewOutputEnabled;
+  private slots:
+	void onFormAccepted();
 
   private:
-	static Config* _instance;
+	Ui::NDISettings* ui;
 };
 
-#endif // CONFIG_H
+#endif // NDISETTINGS_H
