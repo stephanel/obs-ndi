@@ -62,12 +62,6 @@ const char* ndi_filter_getname(void* data)
 	return obs_module_text("NDIPlugin.FilterName");
 }
 
-const char* ndi_audiofilter_getname(void* data)
-{
-	UNUSED_PARAMETER(data);
-	return obs_module_text("NDIPlugin.AudioFilterName");
-}
-
 void ndi_filter_update(void* data, obs_data_t* settings);
 
 obs_properties_t* ndi_filter_getproperties(void* data)
@@ -268,21 +262,6 @@ void* ndi_filter_create(obs_data_t* settings, obs_source_t* source)
 	return s;
 }
 
-void* ndi_filter_create_audioonly(obs_data_t* settings, obs_source_t* source)
-{
-	auto s = (struct ndi_filter*)bzalloc(sizeof(struct ndi_filter));
-	s->is_audioonly = true;
-	s->context = source;
-	s->perf_token = os_request_high_performance("NDI Filter (Audio Only)");
-	pthread_mutex_init(&s->ndi_sender_audio_mutex, NULL);
-	pthread_mutex_init(&s->ndi_sender_video_mutex, NULL);
-
-	obs_get_audio_info(&s->oai);
-
-	ndi_filter_update(s, settings);
-	return s;
-}
-
 void ndi_filter_destroy(void* data)
 {
 	auto s = (struct ndi_filter*)data;
@@ -301,21 +280,6 @@ void ndi_filter_destroy(void* data)
 	gs_stagesurface_unmap(s->stagesurface);
 	gs_stagesurface_destroy(s->stagesurface);
 	gs_texrender_destroy(s->texrender);
-
-	if (s->perf_token) {
-		os_end_high_performance(s->perf_token);
-	}
-
-	bfree(s);
-}
-
-void ndi_filter_destroy_audioonly(void* data)
-{
-	auto s = (struct ndi_filter*)data;
-
-	pthread_mutex_lock(&s->ndi_sender_audio_mutex);
-	ndiLib->send_destroy(s->ndi_sender);
-	pthread_mutex_unlock(&s->ndi_sender_audio_mutex);
 
 	if (s->perf_token) {
 		os_end_high_performance(s->perf_token);
@@ -352,7 +316,7 @@ struct obs_audio_data* ndi_filter_asyncaudio(void *data,
 	audio_frame.channel_stride_in_bytes = audio_frame.no_samples * 4;
 
 	size_t data_size =
-		audio_frame.no_channels * audio_frame.channel_stride_in_bytes;
+		(size_t)audio_frame.no_channels * (size_t)audio_frame.channel_stride_in_bytes;
 	uint8_t* ndi_data = (uint8_t*)bmalloc(data_size);
 
 	for (int i = 0; i < audio_frame.no_channels; ++i) {
@@ -390,26 +354,6 @@ struct obs_source_info create_ndi_filter_info()
 	ndi_filter_info.video_render	= ndi_filter_videorender;
 
 	// Audio is available only with async sources
-	ndi_filter_info.filter_audio	= ndi_filter_asyncaudio;
-
-	return ndi_filter_info;
-}
-
-struct obs_source_info create_ndi_audiofilter_info()
-{
-	struct obs_source_info ndi_filter_info = {};
-	ndi_filter_info.id				= "ndi_audiofilter";
-	ndi_filter_info.type			= OBS_SOURCE_TYPE_FILTER;
-	ndi_filter_info.output_flags	= OBS_SOURCE_AUDIO;
-
-	ndi_filter_info.get_name		= ndi_audiofilter_getname;
-	ndi_filter_info.get_properties	= ndi_filter_getproperties;
-	ndi_filter_info.get_defaults	= ndi_filter_getdefaults;
-
-	ndi_filter_info.create			= ndi_filter_create_audioonly;
-	ndi_filter_info.destroy			= ndi_filter_destroy_audioonly;
-	ndi_filter_info.update			= ndi_filter_update;
-
 	ndi_filter_info.filter_audio	= ndi_filter_asyncaudio;
 
 	return ndi_filter_info;
