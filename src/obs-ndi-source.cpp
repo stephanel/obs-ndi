@@ -69,6 +69,9 @@ struct ndi_source
 	NDIlib_tally_t tally;
 	bool alpha_filter_enabled;
 	os_performance_token_t* perf_token;
+
+	uint8_t* video_conv_buffer;
+	size_t video_conv_buffer_size;
 };
 
 static obs_source_t* find_filter_by_id(obs_source_t* context, const char* id)
@@ -153,6 +156,23 @@ static obs_source_frame* blank_video_frame()
 	obs_source_frame* frame = obs_source_frame_create(VIDEO_FORMAT_NONE, 0, 0);
 	frame->timestamp = os_gettime_ns();
 	return frame;
+}
+
+void convert_uyva_to_i42a(uint8_t* in_buf, uint8_t* out_buf, uint32_t width, uint32_t height)
+{
+	// TODO
+}
+
+void prepare_i42a_conv_buffer(uint8_t** conv_buffer, size_t* conv_buffer_size, uint32_t width, uint32_t height)
+{
+	if (!conv_buffer) {
+		return;
+	}
+
+	size_t buf_size = 0; // TODO
+	if (buf_size != *conv_buffer_size) {
+		brealloc(*conv_buffer, buf_size);
+	}
 }
 
 const char* ndi_source_getname(void* data)
@@ -366,8 +386,13 @@ void* ndi_source_poll_audio_video(void* data)
 					break;
 
 				case NDIlib_FourCC_type_UYVA:
-					// TODO transform UYVA (packet 4:2:2 followed by alpha buffer) to I42A (planar 4:2:2 with alpha)
-					obs_video_frame.format = VIDEO_FORMAT_UYVY;
+					// TODO transform UYVA (packet 4:2:2 followed by alpha buffer) to I42A (planar 4:2:2 with alpha - four planes in total)
+					prepare_i42a_conv_buffer(
+						&s->video_conv_buffer, &s->video_conv_buffer_size,
+						obs_video_frame.width, obs_video_frame.height
+					);
+
+					obs_video_frame.format = VIDEO_FORMAT_I42A;
 					break;
 
 				case NDIlib_FourCC_type_I420:
@@ -551,6 +576,8 @@ void* ndi_source_create(obs_data_t* settings, obs_source_t* source)
 	s->source = source;
 	s->running = false;
 	s->perf_token = NULL;
+	s->video_conv_buffer = NULL;
+	s->video_conv_buffer_size = 0;
 	ndi_source_update(s, settings);
 	return s;
 }
@@ -561,6 +588,11 @@ void ndi_source_destroy(void* data)
 	s->running = false;
 	pthread_join(s->av_thread, NULL);
 	ndiLib->recv_destroy(s->ndi_receiver);
+
+	if (s->video_conv_buffer) {
+		bfree(s->video_conv_buffer);
+	}
+
 	bfree(s);
 }
 
