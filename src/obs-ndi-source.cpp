@@ -342,6 +342,11 @@ void* ndi_source_poll_audio_video(void* data)
 		}
 
 		if (frame_received == NDIlib_frame_type_video) {
+			obs_video_frame.width = video_frame.xres;
+			obs_video_frame.height = video_frame.yres;
+			obs_video_frame.linesize[0] = video_frame.line_stride_in_bytes;
+			obs_video_frame.data[0] = video_frame.p_data;
+
 			switch (video_frame.FourCC) {
 				case NDIlib_FourCC_type_BGRA:
 					obs_video_frame.format = VIDEO_FORMAT_BGRA;
@@ -357,7 +362,11 @@ void* ndi_source_poll_audio_video(void* data)
 					break;
 
 				case NDIlib_FourCC_type_UYVY:
+					obs_video_frame.format = VIDEO_FORMAT_UYVY;
+					break;
+
 				case NDIlib_FourCC_type_UYVA:
+					// TODO transform UYVA (packet 4:2:2 followed by alpha buffer) to I42A (planar 4:2:2 with alpha)
 					obs_video_frame.format = VIDEO_FORMAT_UYVY;
 					break;
 
@@ -385,11 +394,6 @@ void* ndi_source_poll_audio_video(void* data)
 						(uint64_t)(video_frame.timecode * 100);
 					break;
 			}
-
-			obs_video_frame.width = video_frame.xres;
-			obs_video_frame.height = video_frame.yres;
-			obs_video_frame.linesize[0] = video_frame.line_stride_in_bytes;
-			obs_video_frame.data[0] = video_frame.p_data;
 
 			video_format_get_parameters(s->yuv_colorspace, s->yuv_range,
 				obs_video_frame.color_matrix, obs_video_frame.color_range_min,
@@ -443,7 +447,7 @@ void ndi_source_update(void* data, obs_data_t* settings)
 	NDIlib_recv_create_v3_t recv_desc;
 	recv_desc.source_to_connect_to.p_ndi_name = obs_data_get_string(settings, PROP_SOURCE);
 	recv_desc.allow_video_fields = true;
-	recv_desc.color_format = NDIlib_recv_color_format_UYVY_BGRA;
+	recv_desc.color_format = NDIlib_recv_color_format_fastest;
 
 	switch (obs_data_get_int(settings, PROP_BANDWIDTH)) {
 		case PROP_BW_HIGHEST:
